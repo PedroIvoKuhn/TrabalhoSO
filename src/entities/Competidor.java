@@ -49,19 +49,21 @@ public class Competidor implements Runnable {
 
     @Override
     public void run() {
-        if (getIdade() <= 14) {
-            setPossuiCapacete(kartodromo.pegarCapacete(this));
-            setPossuiKart(kartodromo.pegarKart(this));
-        } else {
-            setPossuiKart(kartodromo.pegarKart(this));
-            setPossuiCapacete(kartodromo.pegarCapacete(this));
+        while (!(possuiKart() && possuiCapacete())) {
+            if (getIdade() <= 14) {
+                setPossuiCapacete(kartodromo.pegarCapacete(this));
+                setPossuiKart(kartodromo.pegarKart(this));
+            } else {
+                setPossuiKart(kartodromo.pegarKart(this));
+                setPossuiCapacete(kartodromo.pegarCapacete(this));
+            }
+            
+            if (possuiKart() && possuiCapacete()) {
+                kartodromo.correndo(this);
+            }
+            System.out.println(nome + " esta liberando os recursos");
+            kartodromo.liberarRecursos(this);
         }
-
-        if (possuiKart() && possuiCapacete()) {
-            kartodromo.correndo(this);
-        }
-        System.out.println(nome + " esta liberando os recursos");
-        kartodromo.liberarRecursos(this);
     }
     
 }
