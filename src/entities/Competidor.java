@@ -60,10 +60,10 @@ public class Competidor implements Runnable {
             
             if (possuiKart() && possuiCapacete()) {
                 kartodromo.correndo(this);
-            }
-            System.out.println(nome + " esta liberando os recursos");
-            kartodromo.liberarRecursos(this);
+            }         
         }
+        System.out.println(nome + " esta liberando os recursos");
+        kartodromo.liberarRecursos(this);
     }
     
 }

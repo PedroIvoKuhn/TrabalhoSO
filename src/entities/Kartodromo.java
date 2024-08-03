@@ -47,7 +47,7 @@ public class Kartodromo{
     public void correndo(Competidor competidor){
         try {
             // A idade é o numero de segundos da volta
-            System.out.println(competidor.getNome() + " está correndo...");
+            System.out.println(competidor.getNome() + " Idade: " + competidor.getIdade()+ " " + " está correndo...");
             Thread.sleep(1000);
             clientesAtendidos++;
         } catch (Exception e) {
