@@ -49,7 +49,7 @@ public class Competidor implements Runnable {
 
     @Override
     public void run() {
-        while (!(possuiKart() && possuiCapacete())) {
+        while (true) {
             if (getIdade() <= 14) {
                 setPossuiCapacete(kartodromo.pegarCapacete(this));
                 setPossuiKart(kartodromo.pegarKart(this));
@@ -60,7 +60,11 @@ public class Competidor implements Runnable {
             
             if (possuiKart() && possuiCapacete()) {
                 kartodromo.correndo(this);
-            }         
+                break;
+            }else{
+                System.out.println(nome + " esta liberando os recursos");
+                kartodromo.liberarRecursos(this);
+            }  
         }
         System.out.println(nome + " esta liberando os recursos");
         kartodromo.liberarRecursos(this);

@@ -1,10 +1,12 @@
 package entities;
 
+import java.util.Random;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 public class Kartodromo{
     // colocar o tempo de um dia? para ficar esperando pelo recurso
+    Random random = new Random();
     private int TEMPO_MAX_ESPERA = 1;
     private Semaphore karts;
     private Semaphore capacetes;
@@ -48,8 +50,8 @@ public class Kartodromo{
         try {
             // A idade é o numero de segundos da volta
             System.out.println(competidor.getNome() + " Idade: " + competidor.getIdade()+ " " + " está correndo...");
-            Thread.sleep(1000);
             clientesAtendidos++;
+            Thread.sleep(random.nextInt(500, 6000));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -65,7 +67,7 @@ public class Kartodromo{
         }
     }
 
-    public void relatório(){
+    public void relatorio(){
         System.out.println("karts disponiveis: " + karts.availablePermits());
         System.out.println("capacetes disponiveis: " + capacetes.availablePermits());
         System.out.println("Clientes Atendidos: " + clientesAtendidos);
