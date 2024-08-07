@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit;
 public class Kartodromo{
     // colocar o tempo de um dia? para ficar esperando pelo recurso
     Random random = new Random();
-    private int TEMPO_MAX_ESPERA = 1;
+    private int TEMPO_MAX_ESPERA = 5;
     private Semaphore karts;
     private Semaphore capacetes;
     private int clientesAtendidos;
@@ -51,7 +51,7 @@ public class Kartodromo{
             // A idade é o numero de segundos da volta
             System.out.println(competidor.getNome() + " Idade: " + competidor.getIdade()+ " " + " está correndo...");
             clientesAtendidos++;
-            Thread.sleep(random.nextInt(500, 6000));
+            Thread.sleep(random.nextInt(1000, 2000));
         } catch (Exception e) {
             e.printStackTrace();
         }

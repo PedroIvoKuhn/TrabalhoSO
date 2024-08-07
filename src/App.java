@@ -18,7 +18,7 @@ public class App {
         List<Competidor> criancas = new ArrayList<>();
         List<Competidor> adultos = new ArrayList<>();
 
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 20; i++) {
             String nome = "Competidor " + (i + 1);
             int idade;
             if(5 < random.nextInt(10)){
@@ -32,8 +32,11 @@ public class App {
         }
 
         while (numClientesNaoAtendidos > 0) {
-            int numChegaram = random.nextInt(2, 15);
-            int numCrianca = Math.min(numChegaram, criancas.size());
+            int numChegaram = random.nextInt(2, 16);
+            if(numChegaram > numClientesNaoAtendidos){
+                numChegaram = numClientesNaoAtendidos;
+            }
+            int numCrianca = random.nextInt(numChegaram + 1);
             System.out.println("------------- Atendidos nessa rodada: " + numChegaram);
             System.out.println("------------- Num Criança: " + numCrianca);
             System.out.println("------------- Num Adultos: " + (numChegaram - numCrianca));
@@ -48,18 +51,18 @@ public class App {
             }
 
             for (Competidor competidor : chegando) {
-                executor.execute(competidor);
+                executor.execute(competidor);               
             }
 
             numClientesNaoAtendidos -= chegando.size();
-            Thread.sleep(15, 2000); //Tempo ate a proxima chegada de pessoas 
-            kartodromo.relatorio();
+            Thread.sleep(2000); //Tempo ate a proxima chegada de pessoas 
+            System.out.println("----------------------------------------------------------------------" + numClientesNaoAtendidos);
         }
-        System.out.println("Batata");
+
+       
         executor.shutdown();
-        boolean terminated = executor.awaitTermination(5, TimeUnit.SECONDS);
-        if (!terminated) {
-            System.out.println("Algumas tarefas não foram concluídas a tempo.");
+        while (!executor.awaitTermination(5, TimeUnit.SECONDS)) {
+            System.out.println("Aguardando a conclusão de todas as tarefas...");
         }
 
         kartodromo.relatorio();
