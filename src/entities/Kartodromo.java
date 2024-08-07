@@ -22,7 +22,7 @@ public class Kartodromo{
         try {
             if (karts.tryAcquire(TEMPO_MAX_ESPERA, TimeUnit.SECONDS)) {
                 competidor.setPossuiKart(true);
-                System.out.println(competidor.getNome() + " pegou um kart");
+                //System.out.println(competidor.getNome() + " Idade:" + competidor.getIdade() + " pegou um kart");
                 return true;
             }
         } catch (Exception e) {
@@ -36,7 +36,7 @@ public class Kartodromo{
         try {
             if (capacetes.tryAcquire(TEMPO_MAX_ESPERA, TimeUnit.SECONDS)) {
                 competidor.setPossuiCapacete(true);
-                System.out.println(competidor.getNome() + " pegou um capacete");
+                //System.out.println(competidor.getNome() + " Idade:" + competidor.getIdade() + " pegou um capacete");
                 return true;
             }
         } catch (Exception e) {
@@ -49,9 +49,9 @@ public class Kartodromo{
     public void correndo(Competidor competidor){
         try {
             // A idade é o numero de segundos da volta
-            System.out.println(competidor.getNome() + " Idade: " + competidor.getIdade()+ " " + " está correndo...");
+            //System.out.println(competidor.getNome() + " Idade: " + competidor.getIdade()+ " " + " está correndo...");
             clientesAtendidos++;
-            Thread.sleep(random.nextInt(1000, 2000));
+            Thread.sleep(random.nextInt(800, 1200));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -71,5 +71,6 @@ public class Kartodromo{
         System.out.println("karts disponiveis: " + karts.availablePermits());
         System.out.println("capacetes disponiveis: " + capacetes.availablePermits());
         System.out.println("Clientes Atendidos: " + clientesAtendidos);
+        //System.out.println("Clientes não atendidos: " + (totalClientes - clientesAtendidos));
     }
 }

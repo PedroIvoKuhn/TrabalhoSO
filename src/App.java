@@ -13,12 +13,11 @@ public class App {
         Kartodromo kartodromo = new Kartodromo(10, 10);
         ExecutorService executor = Executors.newCachedThreadPool();
         Random random = new Random();
-        int numClientesNaoAtendidos = 0;
 
         List<Competidor> criancas = new ArrayList<>();
         List<Competidor> adultos = new ArrayList<>();
 
-        for (int i = 0; i < 20; i++) {
+        for (int i = 0; i < 300; i++) {  
             String nome = "Competidor " + (i + 1);
             int idade;
             if(5 < random.nextInt(10)){
@@ -28,15 +27,21 @@ public class App {
                 idade = random.nextInt(15, 71);
                 adultos.add(new Competidor(nome, idade, kartodromo));
             }
-            numClientesNaoAtendidos++;
         }
 
-        while (numClientesNaoAtendidos > 0) {
-            int numChegaram = random.nextInt(2, 16);
-            if(numChegaram > numClientesNaoAtendidos){
-                numChegaram = numClientesNaoAtendidos;
+        //Faça algo que pare exatamente nesse tempo
+        long startTime = System.currentTimeMillis();
+
+        while (System.currentTimeMillis() - startTime < 16000) {
+            int numChegaram = random.nextInt(12, 16);
+            int numClientes = adultos.size() + criancas.size();
+            if(numChegaram > numClientes){
+                numChegaram = numClientes;
             }
             int numCrianca = random.nextInt(numChegaram + 1);
+            if(numCrianca > criancas.size()){
+                numCrianca = criancas.size();
+            }
             System.out.println("------------- Atendidos nessa rodada: " + numChegaram);
             System.out.println("------------- Num Criança: " + numCrianca);
             System.out.println("------------- Num Adultos: " + (numChegaram - numCrianca));
@@ -47,6 +52,8 @@ public class App {
                     chegando.add(criancas.remove(0));
                 } else if(!adultos.isEmpty()) {
                     chegando.add(adultos.remove(0));
+                } else {
+                    chegando.add(criancas.remove(0));
                 }
             }
 
@@ -54,15 +61,13 @@ public class App {
                 executor.execute(competidor);               
             }
 
-            numClientesNaoAtendidos -= chegando.size();
-            Thread.sleep(2000); //Tempo ate a proxima chegada de pessoas 
-            System.out.println("----------------------------------------------------------------------" + numClientesNaoAtendidos);
+            Thread.sleep(1000); //Tempo ate a proxima chegada de pessoas 
         }
 
-       
         executor.shutdown();
-        while (!executor.awaitTermination(5, TimeUnit.SECONDS)) {
-            System.out.println("Aguardando a conclusão de todas as tarefas...");
+        boolean terminated = executor.awaitTermination(0, TimeUnit.SECONDS);
+        if (!terminated) {
+            System.out.println("Algumas tarefas não foram concluídas a tempo.");
         }
 
         kartodromo.relatorio();
