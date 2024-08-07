@@ -9,7 +9,7 @@ public class Competidor implements Runnable {
     private boolean possuiKart;
     private boolean possuiCapacete;
     private static Semaphore competidoresAguardando = new Semaphore(0, true); // Semáforo para contar competidores esperando
-    public static int totalClientes;
+    //public static int totalClientes;
 
     public Competidor(String nome, int idade, Kartodromo kartodromo) {
         this.nome = nome;
@@ -54,8 +54,8 @@ public class Competidor implements Runnable {
     @Override
     public void run() {
         try {
-            totalClientes++;
-            System.out.println(totalClientes);
+            //totalClientes++;
+            //System.out.println(totalClientes);
             if (getIdade() <= 14) {
                 competidoresAguardando.release(); // Adiciona ao semáforo quando começa a esperar
             }
