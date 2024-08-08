@@ -53,44 +53,55 @@ public class Competidor implements Runnable {
 
     @Override
     public void run() {
+        /*
         try {
-            //totalClientes++;
-            //System.out.println(totalClientes);
-            if (getIdade() <= 14) {
+             * 
+             //totalClientes++;
+             //System.out.println(totalClientes);
+             if (getIdade() <= 14) {
                 competidoresAguardando.release(); // Adiciona ao semáforo quando começa a esperar
             }
-
+            
             long startTime = System.currentTimeMillis();
+            */
 
             while (true) {
                 if (getIdade() <= 14) {
                     setPossuiCapacete(kartodromo.pegarCapacete(this));
                     setPossuiKart(kartodromo.pegarKart(this));
                 } else {
-                    // Espera enquanto há competidores menores de 15 anos esperando, com timeout de 8000ms
-                    while (competidoresAguardando.availablePermits() > 0 &&
-                            System.currentTimeMillis() - startTime < 2000) {
+                    /*
+                     * 
+                     // Espera enquanto há competidores menores de 15 anos esperando, com timeout de 8000ms
+                     while (competidoresAguardando.availablePermits() > 0 &&
+                     System.currentTimeMillis() - startTime < 2000) {
                         Thread.sleep(100); // Espera um pouco antes de verificar novamente
                     }
+                    */
                     setPossuiKart(kartodromo.pegarKart(this));
                     setPossuiCapacete(kartodromo.pegarCapacete(this));
                 }
 
                 if (possuiKart() && possuiCapacete()) {
-                    if (getIdade() <= 14) {
+                    /*
+                     * 
+                     if (getIdade() <= 14) {
                         competidoresAguardando.acquire(); // Remove do semáforo quando adquire todos os recursos
                     }
+                    */
                     kartodromo.correndo(this);
                     //System.out.println(nome + " esta liberando os recursos");
                     kartodromo.liberarRecursos(this);
                     break;
-                } else {
-                    //System.out.println(nome + " esta liberando os recursos");
-                    kartodromo.liberarRecursos(this);
                 }
+                kartodromo.liberarRecursos(this);
+                    
+                //System.out.println(nome + " esta liberando os recursos");   
+                
+
             }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
+       // } catch (InterruptedException e) {
+      //    Thread.currentThread().interrupt();
+      //  }
     }
 }
