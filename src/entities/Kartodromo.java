@@ -3,36 +3,32 @@ package entities;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 public class Kartodromo{
-    // 8 horas =  16s //  1h = 2s
+    // 8 horas =  16s //  1h = 2s // 30m = 1s // 15m = 500ms // 1m = 333ms
     Random random = new Random();
-    private int TEMPO_MAX_ESPERA = 2;
+    private int TEMPO_MAX_ESPERA = 333;
     private Semaphore karts;
     private Semaphore capacetes;
-    //private int clientesAtendidos;
-    //private int clientesNaoAtendidos;
     private Semaphore clientesAtendidos = new Semaphore(0, true);
     private Semaphore clientesNaoAtendidos= new Semaphore(0, true);
+    private Semaphore clientesCorrendo= new Semaphore(0, true);
 
-    private List<Competidor> filaCriancas = new ArrayList<Competidor>();
-    private List<Competidor> filaAdultos = new ArrayList<Competidor>();
-    private List<Competidor> filaCorrer = new ArrayList<Competidor>();
-    
+    private List<Thread> filaCriancas = new ArrayList<Thread>();
+    private List<Thread> filaAdultos = new ArrayList<Thread>();
+    private List<Thread> filaCorrer = new ArrayList<Thread>();    
+    private List<Thread> filaCorrendo = new ArrayList<Thread>();    
 
     public Kartodromo(int numKarts, int numCapacetes) {
         this.karts = new Semaphore(numKarts, true);
         this.capacetes = new Semaphore(numCapacetes, true);
-        //this.clientesAtendidos = 0;
     }
 
     public boolean pegarKart(Competidor competidor){
         try {
-            if (karts.tryAcquire(TEMPO_MAX_ESPERA, TimeUnit.SECONDS)) {
+            if (karts.tryAcquire(TEMPO_MAX_ESPERA, TimeUnit.MILLISECONDS)) {
                 competidor.setPossuiKart(true);
                 return true;
             }
@@ -46,7 +42,7 @@ public class Kartodromo{
 
     public boolean pegarCapacete(Competidor competidor){
         try {
-            if (capacetes.tryAcquire(TEMPO_MAX_ESPERA, TimeUnit.SECONDS)) {
+            if (capacetes.tryAcquire(TEMPO_MAX_ESPERA, TimeUnit.MILLISECONDS)) {
                 competidor.setPossuiCapacete(true);
                 return true;
             }
@@ -62,7 +58,10 @@ public class Kartodromo{
         try {
             clientesAtendidos.release();
             clientesNaoAtendidos.acquire();
-            Thread.sleep(random.nextInt(800, 1200));
+            clientesCorrendo.release();
+            //Thread.sleep(random.nextInt(800, 1200));
+            Thread.sleep(1000);
+            clientesCorrendo.acquire();
         } catch (Exception e) {
             // quando interrompe a threads e ta correndo cai aqui
             liberarRecursos(competidor);
@@ -81,14 +80,14 @@ public class Kartodromo{
 
     public void addCompetidor(Competidor competidor){
         if (competidor.getIdade() < 15) {
-            filaCriancas.add(competidor);
+            filaCriancas.add(new Thread(competidor));
         }else{
-            filaAdultos.add(competidor);
+            filaAdultos.add(new Thread(competidor));
         }
         clientesNaoAtendidos.release();
     }
 
-    public void vaoCorrer(int chegaram, ExecutorService executor, List<Future<?>> proximos){
+    public void vaoCorrer(int chegaram){
         int maxCompetidores = filaAdultos.size() + filaCriancas.size();
         if (chegaram > maxCompetidores){
             chegaram = maxCompetidores;
@@ -98,10 +97,10 @@ public class Kartodromo{
         for (int i = 0; i < chegaram; i++) {
             if (i < numCriancas) {
                 filaCorrer.add((filaCriancas.size() != 0) ? filaCriancas.remove(0) 
-                                                          : filaAdultos.remove(0));
+                                                     : filaAdultos.remove(0));
             } else {
                 filaCorrer.add((filaAdultos.size() != 0) ? filaAdultos.remove(0) 
-                                                         : filaCriancas.remove(0));
+                                                    : filaCriancas.remove(0));
             }
         }
 
@@ -111,10 +110,13 @@ public class Kartodromo{
         System.out.println("------------- Num Crianças: " + numCriancas);
         System.out.println("------------- Num Adultos: " + (chegaram - numCriancas));
         System.out.println("------------- Num Fila: " + filaCorrer.size());
+        System.out.println("------------- Num Correndo: " + clientesCorrendo.availablePermits());
         relatorio();
 
         for (int i = 0; i < filaCorrer.size(); i++) {
-            proximos.add(executor.submit(filaCorrer.remove(0)));
+            Thread thread = filaCorrer.remove(0);
+            thread.start();
+            filaCorrendo.add(thread);
         }
     }
 
@@ -128,5 +130,11 @@ public class Kartodromo{
         System.out.println("Clientes não Atendidos: " + clientesNaoAtendidos.availablePermits());
         System.out.println("====================================================");
 
+    }
+
+    public void fecharKartodromo(){
+        for (Thread competidor : filaCorrendo) {
+            competidor.interrupt();
+        }
     }
 }
