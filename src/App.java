@@ -24,7 +24,7 @@ public class App {
         long startTime = System.currentTimeMillis();
 
         while (System.currentTimeMillis() - startTime < 16000) {
-            kartodromo.vaoCorrer(random.nextInt(12, 16));
+            kartodromo.vaoCorrer(random.nextInt(5, 16));
 
             Thread.sleep(1000); //Tempo ate a proxima chegada de pessoas 
         }
@@ -32,7 +32,8 @@ public class App {
         System.out.print("\033[H\033[2J");  
         System.out.flush();
         kartodromo.fecharKartodromo();
-        Thread.sleep(500);
+        System.out.println("======== FECHANDO KARTODROMO ========");
+        Thread.sleep(1000);
         kartodromo.relatorio();
     }
 }

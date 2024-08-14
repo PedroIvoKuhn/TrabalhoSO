@@ -6,6 +6,8 @@ public class Competidor implements Runnable {
     private Kartodromo kartodromo;
     private boolean possuiKart;
     private boolean possuiCapacete;
+    private boolean correu;
+    private int tentativas;
 
     public Competidor(String nome, int idade, Kartodromo kartodromo) {
         this.nome = nome;
@@ -13,6 +15,8 @@ public class Competidor implements Runnable {
         this.kartodromo = kartodromo;
         this.possuiKart = false;
         this.possuiCapacete = false;
+        this.correu = false;
+        this.tentativas = 0;
     }
 
     public boolean possuiKart() {
@@ -47,23 +51,51 @@ public class Competidor implements Runnable {
         this.idade = idade;
     }
 
+    public boolean isCorreu() {
+        return correu;
+    }
+
+    public void setCorreu(boolean correu) {
+        this.correu = correu;
+    }
+    
+    public int getTentativas() {
+        return tentativas;
+    }
+
+    public void addTentativas() {
+        this.tentativas++;
+    }
+
     @Override
     public void run() {
-        while (!Thread.currentThread().isInterrupted()) {
-            if (getIdade() <= 14) {
-                setPossuiCapacete(kartodromo.pegarCapacete(this));
-                setPossuiKart(kartodromo.pegarKart(this));
-            } else {
-                setPossuiKart(kartodromo.pegarKart(this));
-                setPossuiCapacete(kartodromo.pegarCapacete(this));
-            }
+        while (!Thread.currentThread().isInterrupted() && !isCorreu()) {
+            try {
+                if (getIdade() <= 14) {
+                    setPossuiCapacete(kartodromo.pegarCapacete(this));
+                    if (possuiCapacete()) {
+                    setPossuiKart(kartodromo.pegarKart(this));
+                    }
+                } else {
+                    setPossuiKart(kartodromo.pegarKart(this));
+                    if (possuiKart()) {
+                    setPossuiCapacete(kartodromo.pegarCapacete(this));
+                    }   
+                }
+            
+                if (possuiKart() && possuiCapacete()) {
+                    kartodromo.correndo(this);
+                    setCorreu(true);
+                }
 
-            if (possuiKart() && possuiCapacete()) {
-                kartodromo.correndo(this);
+                if (getTentativas() == 25) {
+                    Thread.currentThread().setPriority(9);
+                }
+                addTentativas();
+            } catch (InterruptedException e) {
                 kartodromo.liberarRecursos(this);
-                break;
+                Thread.currentThread().interrupt();
             }
-            kartodromo.liberarRecursos(this);
         }
     }
 }
