@@ -1,15 +1,13 @@
 package entities;
 
-import java.util.concurrent.Semaphore;
-
 public class Competidor implements Runnable {
     private String nome;
     private int idade;
     private Kartodromo kartodromo;
     private boolean possuiKart;
     private boolean possuiCapacete;
-    private static Semaphore competidoresAguardando = new Semaphore(0, true); // Semáforo para contar competidores esperando
-    //public static int totalClientes;
+    private boolean correu;
+    private int tentativas;
 
     public Competidor(String nome, int idade, Kartodromo kartodromo) {
         this.nome = nome;
@@ -17,6 +15,8 @@ public class Competidor implements Runnable {
         this.kartodromo = kartodromo;
         this.possuiKart = false;
         this.possuiCapacete = false;
+        this.correu = false;
+        this.tentativas = 0;
     }
 
     public boolean possuiKart() {
@@ -51,57 +51,51 @@ public class Competidor implements Runnable {
         this.idade = idade;
     }
 
+    public boolean isCorreu() {
+        return correu;
+    }
+
+    public void setCorreu(boolean correu) {
+        this.correu = correu;
+    }
+    
+    public int getTentativas() {
+        return tentativas;
+    }
+
+    public void addTentativas() {
+        this.tentativas++;
+    }
+
     @Override
     public void run() {
-        /*
-        try {
-             * 
-             //totalClientes++;
-             //System.out.println(totalClientes);
-             if (getIdade() <= 14) {
-                competidoresAguardando.release(); // Adiciona ao semáforo quando começa a esperar
-            }
-            
-            long startTime = System.currentTimeMillis();
-            */
-
-            while (true) {
+        while (!Thread.currentThread().isInterrupted() && !isCorreu()) {
+            try {
                 if (getIdade() <= 14) {
                     setPossuiCapacete(kartodromo.pegarCapacete(this));
+                    if (possuiCapacete()) {
                     setPossuiKart(kartodromo.pegarKart(this));
+                    }
                 } else {
-                    /*
-                     * 
-                     // Espera enquanto há competidores menores de 15 anos esperando, com timeout de 8000ms
-                     while (competidoresAguardando.availablePermits() > 0 &&
-                     System.currentTimeMillis() - startTime < 2000) {
-                        Thread.sleep(100); // Espera um pouco antes de verificar novamente
-                    }
-                    */
                     setPossuiKart(kartodromo.pegarKart(this));
+                    if (possuiKart()) {
                     setPossuiCapacete(kartodromo.pegarCapacete(this));
+                    }   
                 }
-
+            
                 if (possuiKart() && possuiCapacete()) {
-                    /*
-                     * 
-                     if (getIdade() <= 14) {
-                        competidoresAguardando.acquire(); // Remove do semáforo quando adquire todos os recursos
-                    }
-                    */
                     kartodromo.correndo(this);
-                    //System.out.println(nome + " esta liberando os recursos");
-                    kartodromo.liberarRecursos(this);
-                    break;
+                    setCorreu(true);
                 }
-                kartodromo.liberarRecursos(this);
-                    
-                //System.out.println(nome + " esta liberando os recursos");   
-                
 
+                if (getTentativas() == 25) {
+                    Thread.currentThread().setPriority(9);
+                }
+                addTentativas();
+            } catch (InterruptedException e) {
+                kartodromo.liberarRecursos(this);
+                Thread.currentThread().interrupt();
             }
-       // } catch (InterruptedException e) {
-      //    Thread.currentThread().interrupt();
-      //  }
+        }
     }
 }
