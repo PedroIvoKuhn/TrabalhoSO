@@ -6,18 +6,21 @@ import java.util.Random;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-public class Kartodromo{
-    // 8 horas =  16s //  1h = 2s // 30m = 1s // 15m = 500ms // 1m = 333ms
+import entities.enums.RelacaoTempo;
+
+public class Kartodromo {
     Random random = new Random();
-    private int TEMPO_MAX_ESPERA = 333;
+    private int TEMPO_MAX_ESPERA = RelacaoTempo.UM_MINUTO.getValor();
+    private int TEMPO_MIN_CORRIDA = RelacaoTempo.VINTE_MINUTOS.getValor();
+    private int TEMPO_MAX_CORRIDA = RelacaoTempo.QUARENTA_MINUTOS.getValor();
     private Semaphore karts;
     private Semaphore capacetes;
     private Semaphore clientesAtendidos = new Semaphore(0);
-    private Semaphore clientesNaoAtendidos= new Semaphore(0);
-    private Semaphore clientesCorrendo= new Semaphore(0);
-    private Semaphore clientesTentandoCorrer= new Semaphore(0);
-    private Semaphore numeroDeCriancasNaoAtendidas= new Semaphore(0);
-    private Semaphore numeroDeAdultosNaoAtendidas= new Semaphore(0);
+    private Semaphore clientesNaoAtendidos = new Semaphore(0);
+    private Semaphore clientesCorrendo = new Semaphore(0);
+    private Semaphore clientesTentandoCorrer = new Semaphore(0);
+    private Semaphore numeroDeCriancasAtendidas = new Semaphore(0);
+    private Semaphore numeroDeAdultosAtendidos = new Semaphore(0);
 
     private List<Thread> filaCriancas = new ArrayList<Thread>();
     private List<Thread> filaAdultos = new ArrayList<Thread>();
@@ -53,11 +56,11 @@ public class Kartodromo{
         clientesTentandoCorrer.acquire();
         clientesCorrendo.release();
         if (competidor.getIdade() < 15) {
-            numeroDeCriancasNaoAtendidas.acquire();
+            numeroDeCriancasAtendidas.release();
         } else {
-            numeroDeAdultosNaoAtendidas.acquire();
+            numeroDeAdultosAtendidos.release();
         }
-        Thread.sleep(random.nextInt(800, 1200));
+        Thread.sleep(random.nextInt(TEMPO_MIN_CORRIDA, TEMPO_MAX_CORRIDA));
         clientesCorrendo.acquire();
         liberarRecursos(competidor);
     }
@@ -75,12 +78,10 @@ public class Kartodromo{
 
     public void addCompetidor(Competidor competidor){
         if (competidor.getIdade() < 15) {
-            numeroDeCriancasNaoAtendidas.release();
             Thread thread = new Thread(competidor);
-            thread.setPriority(7);
+            thread.setPriority(8);
             filaCriancas.add(thread);
         }else{
-            numeroDeAdultosNaoAtendidas.release();
             filaAdultos.add(new Thread(competidor));
         }
     }
@@ -91,8 +92,7 @@ public class Kartodromo{
             chegaram = maxCompetidores;
         }
         
-        //int numCriancas = random.nextInt(chegaram + 1);
-        int numCriancas = chegaram/2;
+        int numCriancas = random.nextInt(chegaram + 1);
         for (int i = 0; i < chegaram; i++) {
             if (i < numCriancas) {
                 filaCorrer.add((filaCriancas.size() != 0) ? filaCriancas.remove(0) 
@@ -122,15 +122,15 @@ public class Kartodromo{
     }
 
     public void relatorio(){
-        System.out.println("====================================================");
-        System.out.println("Karts disponiveis: " + karts.availablePermits());
-        System.out.println("Capacetes disponiveis: " + capacetes.availablePermits());
-        System.out.println("Clientes Atendidos: " + clientesAtendidos.availablePermits());
-        System.out.println("Clientes não Atendidos: " + clientesNaoAtendidos.availablePermits());
-        System.out.println("Crianças não atendidas: " + numeroDeCriancasNaoAtendidas.availablePermits());
-        System.out.println("Adultos não atendidos: " + numeroDeAdultosNaoAtendidas.availablePermits());
-        System.out.println("Clientes tentando correr: " + clientesTentandoCorrer.availablePermits());
-        System.out.println("====================================================");
+        System.out.println("===================================================");
+        System.out.println("\tKarts disponiveis: " + karts.availablePermits());
+        System.out.println("\tCapacetes disponiveis: " + capacetes.availablePermits());
+        System.out.println("\tClientes Atendidos: " + clientesAtendidos.availablePermits());
+        System.out.println("\tClientes não Atendidos: " + clientesNaoAtendidos.availablePermits());
+        System.out.println("\tCrianças atendidas: " + numeroDeCriancasAtendidas.availablePermits());
+        System.out.println("\tAdultos atendidos: " + numeroDeAdultosAtendidos.availablePermits());
+        System.out.println("\tClientes tentando correr: " + clientesTentandoCorrer.availablePermits());
+        System.out.println("===================================================");
 
     }
 
