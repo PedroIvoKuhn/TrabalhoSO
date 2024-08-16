@@ -74,12 +74,12 @@ public class Competidor implements Runnable {
                 if (getIdade() <= 14) {
                     setPossuiCapacete(kartodromo.pegarCapacete(this));
                     if (possuiCapacete()) {
-                    setPossuiKart(kartodromo.pegarKart(this));
+                        setPossuiKart(kartodromo.pegarKart(this));
                     }
                 } else {
                     setPossuiKart(kartodromo.pegarKart(this));
                     if (possuiKart()) {
-                    setPossuiCapacete(kartodromo.pegarCapacete(this));
+                        setPossuiCapacete(kartodromo.pegarCapacete(this));
                     }   
                 }
             
