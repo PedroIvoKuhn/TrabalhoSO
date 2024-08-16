@@ -12,8 +12,7 @@ public class App {
         for (int i = 0; i < 200; i++) {  
             String nome = "Competidor " + (i + 1);
             int idade;
-            //if(5 < random.nextInt(10)){
-            if(i < 100){
+            if(5 < random.nextInt(10)){
                 idade = random.nextInt(7, 15);
             }else{
                 idade = random.nextInt(15, 71);
@@ -24,7 +23,7 @@ public class App {
         long startTime = System.currentTimeMillis();
         while (System.currentTimeMillis() - startTime < RelacaoTempo.OITO_HORAS.getValor()) {
             kartodromo.vaoCorrer(random.nextInt(5, 16));
-            //Tempo ate a proxima chegada de pessoas
+
             Thread.sleep(RelacaoTempo.TRINTA_MINUTOS.getValor()); 
         }
 
