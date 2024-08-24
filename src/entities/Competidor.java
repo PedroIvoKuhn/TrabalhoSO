@@ -3,7 +3,10 @@ package entities;
 public class Competidor implements Runnable {
     private String nome;
     private int idade;
+    long startTime;
+
     private Kartodromo kartodromo;
+
     private boolean possuiKart;
     private boolean possuiCapacete;
     private boolean correu;
@@ -67,8 +70,17 @@ public class Competidor implements Runnable {
         this.tentativas++;
     }
 
+    public long getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(long startTime) {
+        this.startTime = startTime;
+    }
+
     @Override
     public void run() {
+        setStartTime(System.currentTimeMillis());
         while (!Thread.currentThread().isInterrupted() && !isCorreu()) {
             try {
                 if (getIdade() <= 14) {
@@ -89,7 +101,7 @@ public class Competidor implements Runnable {
                 }
 
                 if (getTentativas() == 25) {
-                    Thread.currentThread().setPriority(9);
+                    Thread.currentThread().setPriority(10);
                 }
                 addTentativas();
             } catch (InterruptedException e) {

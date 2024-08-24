@@ -32,6 +32,10 @@ public class App {
         kartodromo.fecharKartodromo();
         System.out.println("=============== FECHANDO KARTODROMO ===============");
         Thread.sleep(1000);
+
+        int tempo = (int) (kartodromo.tempoMedio()) / RelacaoTempo.UM_MINUTO.getValor();
+        System.out.println("Tempo médio de espera: " + tempo + "m");
+
         kartodromo.relatorio();
     }
 }

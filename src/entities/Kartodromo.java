@@ -10,9 +10,10 @@ import entities.enums.RelacaoTempo;
 
 public class Kartodromo {
     Random random = new Random();
-    private int TEMPO_MAX_ESPERA = RelacaoTempo.UM_MINUTO.getValor();
+    private int TEMPO_MAX_ESPERA =  RelacaoTempo.UM_MINUTO.getValor();
     private int TEMPO_MIN_CORRIDA = RelacaoTempo.VINTE_MINUTOS.getValor();
     private int TEMPO_MAX_CORRIDA = RelacaoTempo.QUARENTA_MINUTOS.getValor();
+    
     private Semaphore karts;
     private Semaphore capacetes;
     private Semaphore clientesAtendidos = new Semaphore(0);
@@ -21,18 +22,21 @@ public class Kartodromo {
     private Semaphore clientesTentandoCorrer = new Semaphore(0);
     private Semaphore numeroDeCriancasAtendidas = new Semaphore(0);
     private Semaphore numeroDeAdultosAtendidos = new Semaphore(0);
+    private Semaphore addListTempo = new Semaphore(1);
 
     private List<Thread> filaCriancas = new ArrayList<Thread>();
     private List<Thread> filaAdultos = new ArrayList<Thread>();
     private List<Thread> filaCorrer = new ArrayList<Thread>();    
-    private List<Thread> filaTentandoCorrendo = new ArrayList<Thread>();    
+    private List<Thread> filaTentandoCorrendo = new ArrayList<Thread>();
+
+    private List<Long> tempoDasThreads = new ArrayList<Long>();
 
     public Kartodromo(int numKarts, int numCapacetes) {
         this.karts = new Semaphore(numKarts, true);
         this.capacetes = new Semaphore(numCapacetes, true);
     }
 
-    public boolean pegarKart(Competidor competidor) throws InterruptedException{
+    public boolean pegarKart(Competidor competidor) throws InterruptedException {
         if (karts.tryAcquire(TEMPO_MAX_ESPERA, TimeUnit.MILLISECONDS)) {
             competidor.setPossuiKart(true);
             return true;
@@ -41,7 +45,7 @@ public class Kartodromo {
         return false;
     }
 
-    public boolean pegarCapacete(Competidor competidor) throws InterruptedException{
+    public boolean pegarCapacete(Competidor competidor) throws InterruptedException {
         if (capacetes.tryAcquire(TEMPO_MAX_ESPERA, TimeUnit.MILLISECONDS)) {
             competidor.setPossuiCapacete(true);
             return true;
@@ -50,11 +54,21 @@ public class Kartodromo {
         return false;
     }
 
-    public void correndo(Competidor competidor) throws InterruptedException{
+    public double tempoMedio(){
+        double media =  tempoDasThreads.stream().mapToLong(Long::longValue).average().orElse(0);
+        return media;
+    }
+
+    public void correndo(Competidor competidor) throws InterruptedException {
+        addListTempo.acquire();
+        tempoDasThreads.add((System.currentTimeMillis() - competidor.getStartTime())); 
+        addListTempo.release();
+
         clientesAtendidos.release();
         clientesNaoAtendidos.acquire();
         clientesTentandoCorrer.acquire();
         clientesCorrendo.release();
+
         if (competidor.getIdade() < 15) {
             numeroDeCriancasAtendidas.release();
         } else {
@@ -79,7 +93,7 @@ public class Kartodromo {
     public void addCompetidor(Competidor competidor){
         if (competidor.getIdade() < 15) {
             Thread thread = new Thread(competidor);
-            thread.setPriority(8);
+            thread.setPriority(7);
             filaCriancas.add(thread);
         }else{
             filaAdultos.add(new Thread(competidor));
